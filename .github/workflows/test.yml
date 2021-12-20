@@ -1,10 +1,6 @@
 name: 测试构建
 
-on: 
-  release:
-    types: [published]
-  repository_dispatch:
-  workflow_dispatch:
+on: [push]
 
 jobs:
   build:
@@ -14,6 +10,16 @@ jobs:
       fail-fast: false
       matrix:
        include:
+         - platform: bromolow
+           version: 6.2.4-25556
+         - platform: bromolow
+           version: 7.0-41222
+         - platform: bromolow
+           version: 7.0.1-42218
+         - platform: apollolake
+           version: 6.2.4-25556
+         - platform: apollolake
+           version: 7.0-41890
          - platform: apollolake
            version: 7.0.1-42218
     steps:
@@ -31,7 +37,6 @@ jobs:
       - name: 准备构建环境
         run: |
           ./redpill_tool_chain.sh build ${{matrix.platform}}-${{matrix.version}}
-
       - name: 配置引导镜像
         run: |
           cp sample_user_config.json ${{matrix.platform}}_user_config.json
@@ -39,7 +44,6 @@ jobs:
           ./redpill_tool_chain.sh add https://github.com/jumkey/redpill-load/raw/develop/redpill-virtio/rpext-index.json
           ./redpill_tool_chain.sh add https://raw.githubusercontent.com/pocopico/rp-ext/master/mpt3sas/rpext-index.json
           ./redpill_tool_chain.sh add https://raw.githubusercontent.com/pocopico/rp-ext/main/ax88179_178a/rpext-index.json
-          
       - name: 编译引导镜像
         run: ./redpill_tool_chain.sh auto ${{matrix.platform}}-${{matrix.version}}
 
@@ -50,5 +54,3 @@ jobs:
           name: dsm-${{matrix.platform}}-${{matrix.version}}
           path: images/redpill-DS[39]*.img
           if-no-files-found: error
-
-
